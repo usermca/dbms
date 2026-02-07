@@ -1,1 +1,132 @@
+CREATE TABLE Team (
+    Teamid INT PRIMARY KEY,
+    Team_Name VARCHAR(50),
+    City VARCHAR(50),
+    Coach VARCHAR(50),
+    Captain_Playerid INT
+);
+
+
+INSERT INTO TEAM VALUES(1, 'Warriors', 'Mumbai', 'Coach A', 101);
+INSERT INTO TEAM VALUES(2, 'Titans', 'Delhi', 'Coach B', 201);
+INSERT INTO TEAM VALUES(3, 'Riders', 'Chennai', 'Coach C', 301);
+
+CREATE TABLE Player (
+    Playerid INT PRIMARY KEY,
+    Name VARCHAR(50),
+    Age INT,
+    Teamid INT,
+    FOREIGN KEY (Teamid) REFERENCES Team(Teamid)
+);
+
+
+INSERT INTO PLAYER VALUES(101, 'Rahul', 22, 1);
+INSERT INTO PLAYER VALUES(102, 'Aman', 19, 1);
+INSERT INTO PLAYER VALUES(103, 'Vikas', 25, 1);
+
+
+
+CREATE TABLE Stadium (
+    Stadiumid INT PRIMARY KEY,
+    Stadium_Name VARCHAR(50),
+    City VARCHAR(50),
+    Area_Name VARCHAR(50),
+    Pincode VARCHAR(10)
+);
+
+INSERT INTO STADIUM VALUES(1, 'National Stadium', 'Mumbai', 'Andheri', '400001');
+INSERT INTO STADIUM VALUES(2, 'City Arena', 'Delhi', 'Dwarka', '110001');
+INSERT INTO STADIUM VALUES(3, 'Beach Ground', 'Chennai', 'Marina', '600001');
+
+
+CREATE TABLE Match_Details (
+    Matchid INT PRIMARY KEY,
+    Match_Date DATE,
+    Match_Time TIME,
+    Stadiumid INT,
+    Team1_id INT,
+    Team2_id INT,
+    Winner_Teamid INT,
+    Man_of_Match_Playerid INT,
+    FOREIGN KEY (Stadiumid) REFERENCES Stadium(Stadiumid),
+    FOREIGN KEY (Team1_id) REFERENCES Team(Teamid),
+    FOREIGN KEY (Team2_id) REFERENCES Team(Teamid),
+    FOREIGN KEY (Winner_Teamid) REFERENCES Team(Teamid),
+    FOREIGN KEY (Man_of_Match_Playerid) REFERENCES Player(Playerid)
+);
+
+INSERT INTO MATCH_DETAILS VALUES(1, '2024-01-10', '10:00:00', 1, 1, 2, 1, 102);
+INSERT INTO MATCH_DETAILS VALUES(2, '2024-01-12', '14:00:00', 1, 1, 3, 1, 102);
+INSERT INTO MATCH_DETAILS VALUES(3, '2024-01-15', '16:00:00', 2, 2, 3, 2, 202);
+INSERT INTO MATCH_DETAILS VALUES(4, '2024-01-18', '18:00:00', 3, 3, 1, 3, 302);
+
+
+
+
+
+
+QUERIES 
+
+1 . 
+SELECT p.Name, t.Team_Name, p.Age
+FROM Player p
+JOIN Team t ON p.Teamid = t.Teamid
+WHERE p.Age = (SELECT MIN(Age) FROM Player);
+
+
+
+2 .  
+SELECT s.*
+FROM Stadium s
+JOIN Match_Details m ON s.Stadiumid = m.Stadiumid
+GROUP BY s.Stadiumid, s.Stadium_Name, s.City, s.Area_Name, s.Pincode
+HAVING COUNT(m.Matchid) = (
+    SELECT MAX(cnt)
+    FROM (
+        SELECT COUNT(*) AS cnt
+        FROM Match_Details
+        GROUP BY Stadiumid
+    ) x
+);
+
+3 .
+SELECT p.*
+FROM Player p
+WHERE p.Playerid NOT IN (SELECT Captain_Playerid FROM Team)
+AND p.Playerid IN (
+    SELECT Man_of_Match_Playerid
+    FROM Match_Details
+    GROUP BY Man_of_Match_Playerid
+    HAVING COUNT(*) >= 2
+);
+
+
+4.
+SELECT t.*
+FROM Team t
+JOIN Match_Details m ON t.Teamid = m.Winner_Teamid
+GROUP BY t.Teamid, t.Team_Name, t.City, t.Coach, t.Captain_Playerid
+HAVING COUNT(m.Matchid) = (
+    SELECT MAX(cnt)
+    FROM (
+        SELECT COUNT(*) AS cnt
+        FROM Match_Details
+        GROUP BY Winner_Teamid
+    ) y
+);
+
+
+5.
+SELECT t.Team_Name
+FROM Team t
+JOIN Match_Details m ON t.Teamid = m.Winner_Teamid
+GROUP BY t.Teamid, t.Team_Name
+HAVING COUNT(DISTINCT m.Stadiumid) = 1;
+
+
+
+
+
+
+
 
