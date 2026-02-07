@@ -30,13 +30,6 @@ INSERT INTO PLAYER VALUES(201,'ROHIT',24,2);
 INSERT INTO PLAYER VALUES(202,'SURESH',21,2);
 
 
-CREATE TABLE PLAYER_PHONE (
-    PHONEID INT PRIMARY KEY,
-    PLAYERID INT,
-    PHONE_NO VARCHAR(15),
-    FOREIGN KEY (PLAYERID) REFERENCES PLAYER(PLAYERID)
-);
-
 CREATE TABLE STADIUM (
     STADIUMID INT PRIMARY KEY,
     STADIUM_NAME VARCHAR(50),
@@ -129,6 +122,163 @@ FROM TEAM T
 JOIN MATCH_DETAILS M ON T.TEAMID = M.WINNER_TEAMID
 GROUP BY T.TEAMID, T.TEAM_NAME
 HAVING COUNT(DISTINCT M.STADIUMID) = 1;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+PROGRAM 5 
+
+
+CREATE TABLE Tourist (
+    tourist_id INT PRIMARY KEY,
+    name VARCHAR(50),
+    age INT
+);
+
+
+INSERT INTO Tourist VALUES (1, 'Alice', 30);
+INSERT INTO Tourist VALUES (2, 'Bob', 25);
+INSERT INTO Tourist VALUES (3, 'Charlie', 28);
+
+
+
+CREATE TABLE Tourist_Email (
+    tourist_id INT,
+    email VARCHAR(100),
+    PRIMARY KEY (tourist_id, email),
+    FOREIGN KEY (tourist_id) REFERENCES Tourist(tourist_id)
+);
+
+INSERT INTO Tourist_Email VALUES (1, 'alice@gmail.com');
+INSERT INTO Tourist_Email VALUES (1, 'alice@yahoo.com');
+INSERT INTO Tourist_Email VALUES (2, 'bob@gmail.com');
+INSERT INTO Tourist_Email VALUES (3, 'charlie@gmail.com');
+
+
+
+
+
+CREATE TABLE Tourist_Place (
+    tourist_place_id INT PRIMARY KEY,
+    name VARCHAR(50),
+    state_name VARCHAR(50),
+    km_from_capital INT,
+    history VARCHAR(255)
+);
+
+INSERT INTO Tourist_Place VALUES (1, 'Gateway of India', 'Maharashtra', 0, 'Historic monument');
+INSERT INTO Tourist_Place VALUES (2, 'Ajanta Caves', 'Maharashtra', 300, 'Ancient caves');
+INSERT INTO Tourist_Place VALUES (3, 'Amber Fort', 'Rajasthan', 11, 'Famous fort');
+INSERT INTO Tourist_Place VALUES (4, 'Hollywood', 'California', 20, 'Movie hub');
+
+
+
+CREATE TABLE Visits (
+    tourist_id INT,
+    tourist_place_id INT,
+    visited_date DATE,
+    PRIMARY KEY (tourist_id, tourist_place_id, visited_date),
+    FOREIGN KEY (tourist_id) REFERENCES Tourist(tourist_id),
+    FOREIGN KEY (tourist_place_id) REFERENCES Tourist_Place(tourist_place_id)
+);
+
+INSERT INTO Visits VALUES (1, 1, '2026-01-01');
+INSERT INTO Visits VALUES (1, 2, '2026-01-02');
+INSERT INTO Visits VALUES (2, 1, '2026-01-03');
+INSERT INTO Visits VALUES (2, 3, '2026-01-04');
+INSERT INTO Visits VALUES (3, 1, '2026-01-05');
+INSERT INTO Visits VALUES (3, 2, '2026-01-06');
+INSERT INTO Visits VALUES (3, 3, '2026-01-07');
+INSERT INTO Visits VALUES (3, 4, '2026-01-08');
+
+
+QUERIES
+
+1.
+
+SELECT state_name, COUNT(*) AS total_places
+FROM Tourist_Place
+GROUP BY state_name
+ORDER BY total_places DESC
+LIMIT 1;
+
+2.
+
+SELECT tp.name, COUNT(DISTINCT v.tourist_id) AS total_visitors
+FROM Tourist_Place tp
+JOIN Visits v ON tp.tourist_place_id = v.tourist_place_id
+GROUP BY tp.name
+ORDER BY total_visitors DESC
+LIMIT 1;
+
+
+3.
+
+SELECT t.name
+FROM Tourist t
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM Tourist_Place tp
+    WHERE tp.state_name = 'Maharashtra'
+      AND tp.tourist_place_id NOT IN (
+          SELECT v.tourist_place_id
+          FROM Visits v
+          WHERE v.tourist_id = t.tourist_id
+      )
+);
+
+
+4.
+
+SELECT t.name
+FROM Tourist t
+WHERE EXISTS (
+    SELECT 1
+    FROM Visits v
+    JOIN Tourist_Place tp ON v.tourist_place_id = tp.tourist_place_id
+    WHERE tp.state_name = 'Maharashtra' AND v.tourist_id = t.tourist_id
+)
+AND NOT EXISTS (
+    SELECT 1
+    FROM Tourist_Place tp
+    WHERE tp.tourist_place_id NOT IN (
+        SELECT v.tourist_place_id
+        FROM Visits v
+        WHERE v.tourist_id = t.tourist_id
+    )
+);
+
+
+5.
+
+SELECT tp.name
+FROM Tourist_Place tp
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM (SELECT DISTINCT state_name FROM Tourist_Place) s
+    WHERE NOT EXISTS (
+        SELECT 1
+        FROM Visits v
+        JOIN Tourist t ON v.tourist_id = t.tourist_id
+        WHERE v.tourist_place_id = tp.tourist_place_id AND tp.state_name = s.state_name
+    )
+);
+
+
 
 
 
