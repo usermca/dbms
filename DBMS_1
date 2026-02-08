@@ -258,3 +258,143 @@ WHERE v.tourist_id IN (
     GROUP BY v2.tourist_id
     HAVING COUNT(DISTINCT tp2.state_name) = (SELECT COUNT(DISTINCT state_name) FROM Tourist_Place)
 );
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+WEB TECHNOLOGY 
+
+1.
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Stacked Paragraphs</title>
+
+<style type="text/css">
+.para {
+position: absolute;
+width: 300px;
+height: 120px;
+padding: 10px;
+border: 1px solid black;
+font-size: 16px;
+
+}
+
+#p1 { background-color: yellow; top: 30px; left: 30px; z-index: 3; }
+#p2 { background-color: lightgreen; top: 60px; left: 60px; z-index:2;}
+#p3 { background-color: lightblue; top: 90px; left: 90px; z-index: 1;}
+
+</style>
+
+<script type="text/javascript">
+var highestZIndex = 3;
+
+function bringToTop(paragraphId) {
+highestZIndex = highestZIndex + 1;
+document.getElementById(paragraphId).style.zIndex = highestZIndex;
+}
+
+</script>
+</head>
+
+<body>
+<div id="p1" class="para" onmouseover="bringToTop('p1')">
+<p>Paragraph One. Hover to bring this paragraph to the top.</p>
+</div>
+
+<div id="p2" class="para" onmouseover="bringToTop('p2')">
+<p>Paragraph Two. Only part is visible initially.</p>
+</div>
+
+<div id="p3" class="para" onmouseover="bringToTop('p3')">
+<p>Paragraph Three. Hover to make it fully visible.</p>
+</div>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+2.
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Restoring Stack Order</title>
+
+<style type="text/css">
+.para {
+position: absolute;
+width: 300px;
+height: 120px;
+padding: 10px;
+border: 1px solid black;
+font-size: 16px;
+}
+
+#p1 { background-color: yellow; top: 30px; left: 30px; z-index: 1; }
+#p2 { background-color: lightgreen; top: 60px; left: 60px; z-index: 2; }
+#p3 { background-color: lightblue; top: 90px; left: 90px; z-index: 3; }
+</style>
+
+<script type="text/javascript">
+
+var originalZIndex = {
+p1: 1,
+p2: 2,
+p3: 3
+};
+
+var highestZIndex = 3;
+function bringToTop(paragraphId) {
+highestZIndex++; // Increase the top z-index
+document.getElementById(paragraphId).style.zIndex = highestZIndex;
+}
+function restorePosition(paragraphId) {
+document.getElementById(paragraphId).style.zIndex = originalZIndex[paragraphId];
+}
+</script>
+</head>
+
+<body>
+<div id="p1" class="para"
+onmouseover="bringToTop('p1')"
+onmouseout="restorePosition('p1')">
+<p>Paragraph One. Returns to original position on mouse out.</p>
+</div>
+
+<div id="p2" class="para"
+onmouseover="bringToTop('p2')"
+onmouseout="restorePosition('p2')">
+<p>Paragraph Two. Stack order is restored.</p>
+</div>
+
+<div id="p3" class="para"
+onmouseover="bringToTop('p3')"
+onmouseout="restorePosition('p3')">
+<p>Paragraph Three. Original z-index is preserved.</p>
+</div>
+</body>
+</html>
